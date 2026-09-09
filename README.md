@@ -350,3 +350,4 @@ None of this changes the architecture -- it's the same pattern
 (RLS-scoped queries, audit logging, permission checks mirrored
 client-side for UX) applied to fewer surfaces than exist. Ask for any
 specific gap closed next.
+"# AEMS" 
