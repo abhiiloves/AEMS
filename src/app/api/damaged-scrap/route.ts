@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
 
 // Report vs approve is split at the RLS layer (scrap_insert vs
-// scrap_review policies in 006_rls_policies.sql) — this route doesn't
+// scrap_review policies in 006_rls_policies.sql) â€” this route doesn't
 // need to re-check "is this user allowed to report" because anyone in
 // scope can; PATCH on [id]/route.ts is where the approve/reject/resolve
 // gate actually lives (admin/it_admin only).
 export async function GET(req: NextRequest) {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const { searchParams } = new URL(req.url);
   const status = searchParams.get("status"); // reported/under_review/approved/rejected/resolved
   const page = Number(searchParams.get("page") ?? "1");
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const body = await req.json(); // { asset_id, reason, photo_url? }
 
   const {

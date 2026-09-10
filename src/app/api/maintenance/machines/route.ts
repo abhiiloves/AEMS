@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
 
 // Prevention (PM) is treated as its own permission category (not tied
-// to any particular asset category) — see maint_machines_select/write
+// to any particular asset category) â€” see maint_machines_select/write
 // in 006_rls_policies.sql. A user can have "Prevention (PM)" scope
 // without having access to the underlying asset's own category at all,
 // matching the previous system's behaviour exactly.
 export async function GET(req: NextRequest) {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const { searchParams } = new URL(req.url);
   const page = Number(searchParams.get("page") ?? "1");
   const pageSize = 25;
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const body = await req.json();
 
   const { data, error } = await supabase.from("maintenance_machines").insert(body).select().single();

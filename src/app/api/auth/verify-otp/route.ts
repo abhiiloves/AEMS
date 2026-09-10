@@ -11,13 +11,13 @@ function hashCode(code: string) {
 
 // Verifies the code against our own otp_codes table (see
 // 010_otp_login.sql), then uses the service-role client to mint a real
-// Supabase Auth session for that email — this is what lets the rest of
+// Supabase Auth session for that email â€” this is what lets the rest of
 // the app (RLS, current_app_user(), etc.) keep working unchanged while
 // the OTP itself is fully custom (own template/branding/rate-limits,
 // not Supabase's built-in auth email).
 export async function POST(req: NextRequest) {
   const { email, code } = await req.json();
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
 
   const { data: otpRow } = await supabase
     .from("otp_codes")

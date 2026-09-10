@@ -4,7 +4,7 @@ import { AuditLogTable } from "@/components/AuditLogTable";
 import { redirect } from "next/navigation";
 
 export default async function AuditLogsPage() {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const {
     data: { user },
   } = await supabase.auth.getUser();

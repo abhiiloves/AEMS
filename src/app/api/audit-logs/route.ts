@@ -5,11 +5,11 @@ import { computeRiskLevel, type AuditRow } from "@/lib/auditRisk";
 // Scoping is entirely RLS's job (audit_select policy in
 // 006_rls_policies.sql: it_admin sees everything, admin sees only rows
 // whose plant/location falls in their own user_scope, user/hr get zero
-// rows). This route doesn't duplicate that logic — it just adds
+// rows). This route doesn't duplicate that logic â€” it just adds
 // filtering, pagination, and the risk_level annotation on top of
 // whatever RLS already returned.
 export async function GET(req: NextRequest) {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const { searchParams } = new URL(req.url);
   const category = searchParams.get("category"); // session | data_change
   const role = searchParams.get("role");

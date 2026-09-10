@@ -3,21 +3,22 @@ import { AppShell } from "@/components/AppShell";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 
-export default async function EmployeeDetailPage({ params }: { params: { id: string } }) {
-  const supabase = createServerSupabase();
+export default async function EmployeeDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const supabase = await createServerSupabase();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
   const { data: appUser } = await supabase.from("users").select("email, role").eq("auth_id", user.id).single();
 
-  const { data: employee } = await supabase.from("employees").select("*").eq("id", params.id).single();
+  const { data: employee } = await supabase.from("employees").select("*").eq("id", id).single();
   if (!employee) notFound();
 
   const { data: assignments } = await supabase
     .from("asset_assignment_history")
     .select("id, assigned_on, returned_on, assets:asset_id ( id, asset_code, brand, model )")
-    .eq("employee_id", params.id)
+    .eq("employee_id", id)
     .order("assigned_on", { ascending: false });
 
   const current = (assignments ?? []).filter((a) => a.returned_on === null);
@@ -38,8 +39,8 @@ export default async function EmployeeDetailPage({ params }: { params: { id: str
             <ul className="space-y-2">
               {current.map((a) => (
                 <li key={a.id}>
-                  <Link href={`/assets/${a.assets?.id}`} className="text-sm text-accent hover:underline">
-                    {a.assets?.asset_code} — {a.assets?.brand} {a.assets?.model}
+                  <Link href={`/assets/${a.assets?.[0]?.id}`} className="text-sm text-accent hover:underline">
+                    {a.assets?.[0]?.asset_code} — {a.assets?.[0]?.brand} {a.assets?.[0]?.model}
                   </Link>
                 </li>
               ))}
@@ -58,7 +59,7 @@ export default async function EmployeeDetailPage({ params }: { params: { id: str
               {past.map((a) => (
                 <li key={a.id} className="flex justify-between text-ink-600">
                   <span>
-                    {a.assets?.asset_code} — {a.assets?.brand} {a.assets?.model}
+                    {a.assets?.[0]?.asset_code} — {a.assets?.[0]?.brand} {a.assets?.[0]?.model}
                   </span>
                   <span className="text-ink-400">
                     {new Date(a.assigned_on).toLocaleDateString()} → {a.returned_on ? new Date(a.returned_on).toLocaleDateString() : ""}

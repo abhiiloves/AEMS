@@ -95,7 +95,7 @@ export function UserManagementBoard({
   const scopeLabel = (scope: Scope[]) => {
     if (scope.length === 0) return "None";
     if (scope.some((s) => !s.location_id && !s.plant_id && !s.category_id)) {
-      return scope[0].can_edit ? "All (edit)" : "All (read-only)";
+      return scope[0]?.can_edit ? "All (edit)" : "All (read-only)";
     }
     const cats = [...new Set(scope.map((s) => categories.find((c) => c.id === s.category_id)?.name).filter(Boolean))];
     return cats.join(", ") || "Scoped";

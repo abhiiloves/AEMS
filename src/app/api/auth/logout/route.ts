@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
 
   const {
     data: { user },
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
         user_id: appUser.id,
         user_role: appUser.role,
         event_category: "session",
-        event_type: "logout", // client-side sleep/disconnect logout events use auto_logout_* instead — see README
+        event_type: "logout", // client-side sleep/disconnect logout events use auto_logout_* instead â€” see README
       });
     }
   }

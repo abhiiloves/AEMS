@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { SESSION_COOKIE } from "@/lib/auth/session";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { SESSION_COOKIE } from "@/lib/auth/constants";
 
 // Enforces, on every request:
 //  1. session must exist and be marked is_active in the `sessions` table
@@ -32,9 +32,9 @@ export async function middleware(req: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get: (name) => req.cookies.get(name)?.value,
-        set: (name, value, options) => res.cookies.set({ name, value, ...options }),
-        remove: (name, options) => res.cookies.set({ name, value: "", ...options }),
+        get: (name: string) => req.cookies.get(name)?.value,
+        set: (name: string, value: string, options: CookieOptions) => res.cookies.set({ name, value, ...options }),
+        remove: (name: string, options: CookieOptions) => res.cookies.set({ name, value: "", ...options }),
       },
     }
   );

@@ -2,8 +2,7 @@ import type { NextRequest } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import crypto from "crypto";
-
-export const SESSION_COOKIE = "aems_sid";
+import { SESSION_COOKIE } from "@/lib/auth/constants";
 
 // Called after any successful login (OTP verify is the only path now
 // that the system is back to OTP-only auth). Enforces the single-
@@ -37,7 +36,7 @@ export async function finalizeSession(
     device_info: req.headers.get("user-agent"),
   });
 
-  cookies().set(SESSION_COOKIE, sessionId, {
+  (await cookies()).set(SESSION_COOKIE, sessionId, {
     httpOnly: true,
     secure: true,
     sameSite: "lax",

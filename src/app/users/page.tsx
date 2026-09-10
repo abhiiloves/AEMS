@@ -4,7 +4,7 @@ import { UserManagementBoard } from "@/components/UserManagementBoard";
 import { redirect } from "next/navigation";
 
 export default async function UsersPage() {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const {
     data: { user },
   } = await supabase.auth.getUser();

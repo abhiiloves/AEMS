@@ -4,7 +4,7 @@ import { AssetsBrowser } from "@/components/AssetsBrowser";
 import { redirect } from "next/navigation";
 
 export default async function AssetsPage() {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const {
     data: { user },
   } = await supabase.auth.getUser();

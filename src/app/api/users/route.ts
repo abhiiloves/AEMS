@@ -3,10 +3,10 @@ import { createServerSupabase } from "@/lib/supabase/server";
 import { canAssignRole, type Role } from "@/lib/permissions";
 
 // Matches the User Management table from the old system: email, role,
-// locations, plants, categories, actions — plus the per-user
+// locations, plants, categories, actions â€” plus the per-user
 // can_bulk_import/can_export toggles the project added on top.
 export async function GET() {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
 
   const { data, error } = await supabase
     .from("users")
@@ -23,7 +23,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const body = await req.json(); // { email, role, employee_id?, scope: [{location_id, plant_id, category_id, can_edit}] }
 
   const {

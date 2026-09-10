@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
 
 // Access: RLS's employees_select/employees_write policies restrict this
-// to hr/admin/it_admin roles (see 006_rls_policies.sql) — a plain
+// to hr/admin/it_admin roles (see 006_rls_policies.sql) â€” a plain
 // `user` role gets zero rows back, not an error, same as the old
 // system's Employee Directory being HR/Admin/IT-Admin only.
 export async function GET(req: NextRequest) {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const { searchParams } = new URL(req.url);
   const q = searchParams.get("q");
   const page = Number(searchParams.get("page") ?? "1");
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
   const { data, error, count } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
-  // "1 asset" / "3 assets" badge like the old Employee Directory cards —
+  // "1 asset" / "3 assets" badge like the old Employee Directory cards â€”
   // done as one extra query instead of N+1 per employee.
   const ids = (data ?? []).map((e) => e.id);
   const { data: counts } = await supabase
@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const body = await req.json();
 
   const { data, error } = await supabase.from("employees").insert(body).select().single();

@@ -4,7 +4,7 @@ import { EmailAutomationBoard } from "@/components/EmailAutomationBoard";
 import { redirect } from "next/navigation";
 
 export default async function EmailAutomationPage() {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const {
     data: { user },
   } = await supabase.auth.getUser();

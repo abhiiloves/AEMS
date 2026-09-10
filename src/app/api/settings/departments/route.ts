@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
 
 // Reads are open to any authenticated user (departments_read policy),
-// writes are IT-Admin-only (departments_write policy) — this route
+// writes are IT-Admin-only (departments_write policy) â€” this route
 // doesn't add its own gate on top, it just makes a denial readable.
 export async function GET() {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const { data, error } = await supabase
     .from("departments")
     .select("id, name, location_id, admin_user_id, admin:admin_user_id ( id, email )")
@@ -15,7 +15,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const body = await req.json(); // { name, location_id?, admin_user_id? }
 
   const { data, error } = await supabase.from("departments").insert(body).select().single();

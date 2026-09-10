@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
 
 // Mirrors the old HR Dashboard's four counter cards (Total Employees,
-// Assets Assigned, Active Staff, Inactive Records) — but
+// Assets Assigned, Active Staff, Inactive Records) â€” but
 // "Inactive Records" is a real query here, not a hardcoded 0 like the
 // old system had.
 export async function GET() {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
 
   const [{ count: totalEmployees }, { count: activeStaff }, { count: inactiveRecords }, { count: assetsAssigned }] =
     await Promise.all([

@@ -5,10 +5,10 @@ import { createServerSupabase } from "@/lib/supabase/server";
 // user (sub_departments_read policy), write is IT-Admin-only
 // (sub_departments_write policy, 014_department_hierarchy.sql). Works
 // for both "add a sub-department to a brand-new department" and "add
-// one to an existing department" — same POST body either way, just
+// one to an existing department" â€” same POST body either way, just
 // pass the department_id you already have.
 export async function GET() {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const { data, error } = await supabase
     .from("sub_departments")
     .select("id, name, department_id, department:department_id ( id, name )")
@@ -18,7 +18,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const body = await req.json(); // { name, department_id }
 
   const { data, error } = await supabase.from("sub_departments").insert(body).select().single();

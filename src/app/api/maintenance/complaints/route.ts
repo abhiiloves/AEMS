@@ -3,10 +3,10 @@ import { createServerSupabase } from "@/lib/supabase/server";
 
 // This is the in-app complaint form (logged-in user). The QR-scan
 // public route (/api/maintenance/scan/[id]) is separate and
-// intentionally unauthenticated — see that file. Both funnel into the
+// intentionally unauthenticated â€” see that file. Both funnel into the
 // same maintenance_complaints table.
 export async function GET(req: NextRequest) {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const { searchParams } = new URL(req.url);
   const status = searchParams.get("status"); // reported/in_progress/resolved
   const page = Number(searchParams.get("page") ?? "1");
@@ -33,8 +33,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = createServerSupabase();
-  // reporter_name / reporter_phone are typed by hand in the form — no
+  const supabase = await createServerSupabase();
+  // reporter_name / reporter_phone are typed by hand in the form â€” no
   // auto-fill from the logged-in session, matching the previous
   // system's behaviour (per project decision).
   const body = await req.json();

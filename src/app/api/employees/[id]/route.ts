@@ -1,44 +1,58 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
 
-// This is the "kis-kis ko kitne laptop assign hue, history" answer
-// from the project plan — free to query because assignment is
-// history-driven (asset_assignment_history), never an in-place
-// overwrite of assets.assigned_to.
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
-  const supabase = createServerSupabase();
+// Access: RLS's employees_select/employees_write policies restrict this
+// to hr/admin/it_admin roles (see 006_rls_policies.sql) â€” a plain
+// `user` role gets zero rows back, not an error, same as the old
+// system's Employee Directory being HR/Admin/IT-Admin only.
+export async function GET(req: NextRequest) {
+  const supabase = await createServerSupabase();
+  const { searchParams } = new URL(req.url);
+  const q = searchParams.get("q");
+  const page = Number(searchParams.get("page") ?? "1");
+  const pageSize = 25;
 
-  const { data: employee, error } = await supabase.from("employees").select("*").eq("id", params.id).single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 404 });
-
-  const { data: assignments } = await supabase
-    .from("asset_assignment_history")
+  let query = supabase
+    .from("employees")
     .select(
-      `
-      id, assigned_on, returned_on, condition_at_assignment, condition_at_return,
-      assets:asset_id ( id, asset_code, brand, model, category_id )
-    `
+      "id, employee_code, full_name, corporate_email, contact_number, department_id, location_id, plant_id, is_active",
+      { count: "exact" }
     )
-    .eq("employee_id", params.id)
-    .order("assigned_on", { ascending: false });
+    .order("full_name")
+    .range((page - 1) * pageSize, page * pageSize - 1);
 
-  const current = (assignments ?? []).filter((a) => a.returned_on === null);
-  const past = (assignments ?? []).filter((a) => a.returned_on !== null);
+  if (q && q.length >= 2) {
+    // pg_trgm-backed, see idx_employees_search_trgm in 001_core_schema.sql
+    query = query.or(`full_name.ilike.%${q}%,employee_code.ilike.%${q}%,corporate_email.ilike.%${q}%`);
+  }
 
-  return NextResponse.json({
-    employee,
-    currentAssets: current,
-    assignmentHistory: past,
-    totalAssetsEverAssigned: assignments?.length ?? 0,
-  });
+  const { data, error, count } = await query;
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  // "1 asset" / "3 assets" badge like the old Employee Directory cards â€”
+  // done as one extra query instead of N+1 per employee.
+  const ids = (data ?? []).map((e) => e.id);
+  const { data: counts } = await supabase
+    .from("asset_assignment_history")
+    .select("employee_id")
+    .in("employee_id", ids)
+    .is("returned_on", null);
+
+  const assetCountByEmployee = new Map<string, number>();
+  for (const row of counts ?? []) {
+    assetCountByEmployee.set(row.employee_id, (assetCountByEmployee.get(row.employee_id) ?? 0) + 1);
+  }
+
+  const enriched = (data ?? []).map((e) => ({ ...e, assigned_asset_count: assetCountByEmployee.get(e.id) ?? 0 }));
+
+  return NextResponse.json({ data: enriched, total: count, page, pageSize });
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  const supabase = createServerSupabase();
+export async function POST(req: NextRequest) {
+  const supabase = await createServerSupabase();
   const body = await req.json();
 
-  const { data: before } = await supabase.from("employees").select("*").eq("id", params.id).single();
-  const { data, error } = await supabase.from("employees").update(body).eq("id", params.id).select().single();
+  const { data, error } = await supabase.from("employees").insert(body).select().single();
   if (error) {
     const status = error.code === "42501" ? 403 : 400;
     return NextResponse.json({ error: error.message }, { status });
@@ -54,12 +68,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     user_email: appUser?.email,
     user_role: appUser?.role,
     event_category: "data_change",
-    event_type: "update",
+    event_type: "create",
     table_name: "employees",
-    record_id: params.id,
-    old_value: before,
+    record_id: data.id,
     new_value: data,
+    location_id: data.location_id,
   });
 
-  return NextResponse.json({ data });
+  return NextResponse.json({ data }, { status: 201 });
 }

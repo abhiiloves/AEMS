@@ -14,12 +14,12 @@ function hashCode(code: string) {
 
 // Same OTP behaviour as the old system (resend cooldown, max sends per
 // window, max verify attempts), but the code itself lives in Postgres
-// instead of a Node in-memory Map — the old system's OTP could silently
+// instead of a Node in-memory Map â€” the old system's OTP could silently
 // fail on serverless because a different function instance might handle
 // the verify request than the one that generated the code.
 export async function POST(req: NextRequest) {
   const { email } = await req.json();
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
 
   const windowStart = new Date(Date.now() - SEND_WINDOW_MINUTES * 60 * 1000).toISOString();
   const { data: recent } = await supabase
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
   await supabase.from("otp_codes").insert({ email, code_hash: hashCode(code), expires_at: expiresAt });
 
   // Sent via the project's own email layer (lib/email/send.ts), not
-  // Supabase's built-in auth email — keeps branding/control consistent
+  // Supabase's built-in auth email â€” keeps branding/control consistent
   // with the rest of the notification system. Falls back to logging
   // the code to the server console if SMTP env vars aren't set yet.
   await sendEmail(

@@ -1,59 +1,60 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceRoleSupabase } from "@/lib/supabase/server";
+import { createServerSupabase } from "@/lib/supabase/server";
 
-// The ONLY intentionally-public write path in the system (per project
-// decision: QR scan must work with no login, so a factory-floor worker
-// can report a fault by scanning a machine's code). Everything else in
-// the PM module requires a session — see complaints/route.ts and
-// machines/route.ts. Excluded from middleware.ts's auth matcher.
-//
-// Because this bypasses RLS via the service-role client, it gets its
-// own strict, hand-written validation instead of relying on policies:
-//  - machine must exist
-//  - required fields must be present and bounded in length
-//  - a light per-machine rate limit, so this can't be used to flood
-//    the table (previous system had no such rate limit here at all)
-const MAX_REPORTS_PER_MACHINE_PER_HOUR = 10;
+// Prevention (PM) is treated as its own permission category (not tied
+// to any particular asset category) â€” see maint_machines_select/write
+// in 006_rls_policies.sql. A user can have "Prevention (PM)" scope
+// without having access to the underlying asset's own category at all,
+// matching the previous system's behaviour exactly.
+export async function GET(req: NextRequest) {
+  const supabase = await createServerSupabase();
+  const { searchParams } = new URL(req.url);
+  const page = Number(searchParams.get("page") ?? "1");
+  const pageSize = 25;
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const supabase = createServiceRoleSupabase();
+  const { data, error, count } = await supabase
+    .from("maintenance_machines")
+    .select(
+      "id, equipment_name, machine_type, department_id, location_id, plant_id, next_maintenance_date, last_maintenance_date, status, asset_id",
+      { count: "exact" }
+    )
+    .order("next_maintenance_date", { ascending: true, nullsFirst: false })
+    .range((page - 1) * pageSize, page * pageSize - 1);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  return NextResponse.json({ data, total: count, page, pageSize });
+}
+
+export async function POST(req: NextRequest) {
+  const supabase = await createServerSupabase();
   const body = await req.json();
 
-  if (!body.complaint_text || !body.reporter_name || !body.reporter_phone) {
-    return NextResponse.json({ error: "Complaint, name, and phone are required" }, { status: 400 });
-  }
-  if (body.complaint_text.length > 1000 || body.reporter_name.length > 200) {
-    return NextResponse.json({ error: "Input too long" }, { status: 400 });
-  }
-
-  const { data: machine } = await supabase.from("maintenance_machines").select("id").eq("id", params.id).maybeSingle();
-  if (!machine) return NextResponse.json({ error: "Machine not found" }, { status: 404 });
-
-  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-  const { count } = await supabase
-    .from("maintenance_complaints")
-    .select("*", { count: "exact", head: true })
-    .eq("machine_id", params.id)
-    .gte("reported_at", oneHourAgo);
-
-  if ((count ?? 0) >= MAX_REPORTS_PER_MACHINE_PER_HOUR) {
-    return NextResponse.json({ error: "Too many reports for this machine recently. Try again later." }, { status: 429 });
+  const { data, error } = await supabase.from("maintenance_machines").insert(body).select().single();
+  if (error) {
+    const status = error.code === "42501" ? 403 : 400;
+    return NextResponse.json(
+      { error: status === 403 ? "Only Admin/IT Admin with Prevention (PM) scope can add machines" : error.message },
+      { status }
+    );
   }
 
-  const { data, error } = await supabase
-    .from("maintenance_complaints")
-    .insert({
-      machine_id: params.id,
-      complaint_text: body.complaint_text,
-      reporter_name: body.reporter_name,
-      reporter_phone: body.reporter_phone,
-      photo_url: body.photo_url ?? null,
-      status: "reported",
-    })
-    .select()
-    .single();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: actor } = await supabase.from("users").select("id, email, role").eq("auth_id", user?.id).single();
 
-  if (error) return NextResponse.json({ error: "Could not submit report" }, { status: 500 });
+  await supabase.from("audit_logs").insert({
+    user_id: actor?.id,
+    user_email: actor?.email,
+    user_role: actor?.role,
+    event_category: "data_change",
+    event_type: "create_maintenance_machine",
+    table_name: "maintenance_machines",
+    record_id: data.id,
+    new_value: data,
+    plant_id: data.plant_id,
+    location_id: data.location_id,
+  });
 
   return NextResponse.json({ data }, { status: 201 });
 }

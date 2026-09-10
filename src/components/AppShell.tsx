@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
+  type LucideIcon,
   LayoutGrid,
   Cpu,
   Camera,
@@ -138,7 +139,7 @@ function NavItem({
 }: {
   href: string;
   label: string;
-  icon: React.ComponentType<{ size?: number }>;
+  icon: LucideIcon;
   active: boolean;
 }) {
   return (

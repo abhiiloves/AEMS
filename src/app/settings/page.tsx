@@ -5,12 +5,12 @@ import { redirect } from "next/navigation";
 
 // Settings is IT-Admin-write-only at the RLS layer for every tab here
 // (locations_write / plants_write / categories_write / form_fields_write
-// / departments_write policies) — this page renders for anyone so
+// / departments_write policies) â€” this page renders for anyone so
 // Admin/HR/User can still read the lookups, but the add/edit controls
 // in SettingsBoard check role client-side too, matching the pattern
 // used everywhere else (server RLS is the real gate, client checks are UX).
 export default async function SettingsPage() {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const {
     data: { user },
   } = await supabase.auth.getUser();

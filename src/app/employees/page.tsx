@@ -4,7 +4,7 @@ import { EmployeeDirectory } from "@/components/EmployeeDirectory";
 import { redirect } from "next/navigation";
 
 export default async function EmployeesPage() {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const {
     data: { user },
   } = await supabase.auth.getUser();

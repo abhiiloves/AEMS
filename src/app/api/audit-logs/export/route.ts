@@ -5,9 +5,9 @@ import { createServerSupabase } from "@/lib/supabase/server";
 // Admin (unlike suspicious-activity highlighting and realtime, which
 // stay IT-Admin-only). Admin's export is automatically scoped to their
 // own categories/locations/plants by the same audit_select RLS policy
-// used for the list view — no separate scoping logic needed here.
+// used for the list view â€” no separate scoping logic needed here.
 export async function GET(req: NextRequest) {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
 
   const {
     data: { user },
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
     .from("audit_logs")
     .select("created_at, user_email, user_role, event_category, event_type, table_name, plant_id, ip_address, approx_location")
     .order("created_at", { ascending: false })
-    .limit(10000); // large exports should move to a background job instead — see README
+    .limit(10000); // large exports should move to a background job instead â€” see README
 
   if (from) query = query.gte("created_at", from);
   if (to) query = query.lte("created_at", to);

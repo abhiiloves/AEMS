@@ -4,7 +4,7 @@ import { MaintenanceBoard } from "@/components/MaintenanceBoard";
 import { redirect } from "next/navigation";
 
 export default async function MaintenancePage() {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const {
     data: { user },
   } = await supabase.auth.getUser();

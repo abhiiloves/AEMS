@@ -5,9 +5,9 @@ import { redirect } from "next/navigation";
 // Server component: all the counts below run as the signed-in user via
 // RLS (see 006_rls_policies.sql), so an Admin scoped to one plant sees
 // only their own numbers here without this page doing any scoping
-// itself — same principle as every API route built earlier.
+// itself â€” same principle as every API route built earlier.
 export default async function DashboardPage() {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
 
   const {
     data: { user },

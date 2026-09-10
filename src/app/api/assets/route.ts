@@ -3,13 +3,13 @@ import { createServerSupabase } from "@/lib/supabase/server";
 
 // Reference implementation for every other module (Employees, Damaged/
 // Scrap, Maintenance, ...): RLS does the actual scoping (see
-// 006_rls_policies.sql — this query runs as the caller via the
+// 006_rls_policies.sql â€” this query runs as the caller via the
 // server client, so a query with no filters at all still only returns
 // rows the user's user_scope allows). This route layer exists for
 // search/pagination ergonomics and for writing to audit_logs, not for
 // re-implementing access control that RLS already guarantees.
 export async function GET(req: NextRequest) {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const { searchParams } = new URL(req.url);
   const q = searchParams.get("q");
   const page = Number(searchParams.get("page") ?? "1");
@@ -35,12 +35,12 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   const body = await req.json();
 
   // RLS's assets_insert policy (has_scope with require_edit=true) is
   // the actual gate. If the caller isn't in scope, this insert simply
-  // fails at the database — the try/catch below turns that into a 403
+  // fails at the database â€” the try/catch below turns that into a 403
   // instead of leaking a raw Postgres error.
   const { data, error } = await supabase.from("assets").insert(body).select().single();
 

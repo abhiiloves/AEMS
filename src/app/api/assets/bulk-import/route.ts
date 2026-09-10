@@ -4,7 +4,7 @@ import { createServerSupabase } from "@/lib/supabase/server";
 
 // Per project decisions: bulk import is admin/it_admin only, AND
 // per-user toggleable via users.can_bulk_import (IT Admin can turn it
-// off for a specific Admin — see 001_core_schema.sql). Inserts are
+// off for a specific Admin â€” see 001_core_schema.sql). Inserts are
 // chunked at 500 rows so a 5000-row file doesn't time out or lock the
 // table for the whole request, matching the plan's "chunked batches"
 // note from early in the project.
@@ -22,7 +22,7 @@ interface ImportRow {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
 
   const {
     data: { user },
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
   for (let i = 0; i < validRows.length; i += CHUNK_SIZE) {
     const chunk = validRows.slice(i, i + CHUNK_SIZE);
     // duplicate serial_no within the same file/table surfaces as a
-    // unique-constraint violation here — the whole chunk's error is
+    // unique-constraint violation here â€” the whole chunk's error is
     // reported rather than silently dropping rows, so nothing goes
     // missing without the person knowing.
     const { error, count } = await supabase.from("assets").insert(chunk, { count: "exact" });
