@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import {
   type LucideIcon,
   LayoutGrid,
@@ -24,6 +25,9 @@ import {
   Settings,
   Search,
   LogOut,
+  Menu,
+  X,
+  Activity,
 } from "lucide-react";
 
 // Deliberately mirrors the previous system's sidebar grouping (Asset
@@ -65,52 +69,57 @@ export function AppShell({
   userRole: string;
 }) {
   const pathname = usePathname();
+  const [navOpen, setNavOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-surface-muted">
-      <aside className="flex w-64 shrink-0 flex-col border-r border-surface-border bg-white">
-        <div className="flex items-center gap-3 border-b border-surface-border px-5 py-4">
-          <Image src="/pg-logo.png" alt="PG" width={36} height={36} className="h-9 w-9 object-contain" />
+    <div className="app-frame flex min-h-screen bg-surface-muted">
+      <div className={`nav-scrim ${navOpen ? "nav-scrim-visible" : ""}`} onClick={() => setNavOpen(false)} />
+      <aside className={`app-sidebar ${navOpen ? "app-sidebar-open" : ""}`}>
+        <div className="flex items-center gap-3 border-b border-white/10 px-5 py-5">
+          <div className="brand-mark"><Image src="/pg-logo.png" alt="PG" width={36} height={36} className="h-9 w-9 object-contain" /></div>
           <div>
-            <p className="text-sm font-semibold text-ink-900">A.E.M.S</p>
-            <p className="text-[11px] text-ink-400">Asset Management</p>
+            <p className="text-sm font-semibold tracking-wide text-white">A.E.M.S</p>
+            <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Operations control</p>
           </div>
+          <button type="button" aria-label="Close navigation" className="ml-auto nav-close" onClick={() => setNavOpen(false)}><X size={18} /></button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-3 py-4">
-          <NavItem href="/dashboard" label="Dashboard" icon={LayoutGrid} active={pathname === "/dashboard"} />
+        <nav className="flex-1 overflow-y-auto px-3 py-5">
+          <p className="nav-kicker">Command center</p>
+          <NavItem href="/dashboard" label="Dashboard" icon={LayoutGrid} active={pathname === "/dashboard"} onNavigate={() => setNavOpen(false)} />
 
-          <p className="mb-1 mt-5 px-2 text-[11px] font-semibold tracking-wide text-ink-400">ASSET CATEGORIES</p>
+          <p className="nav-kicker mt-6">Asset register</p>
           {ASSET_CATEGORIES.map((item) => (
-            <NavItem key={item.href} {...item} active={pathname === item.href} />
+            <NavItem key={item.href} {...item} active={pathname === item.href} onNavigate={() => setNavOpen(false)} />
           ))}
           <NavItem
             href="/maintenance"
             label="Preventive Setup"
             icon={ClipboardList}
             active={pathname?.startsWith("/maintenance") ?? false}
+            onNavigate={() => setNavOpen(false)}
           />
 
-          <p className="mb-1 mt-5 px-2 text-[11px] font-semibold tracking-wide text-ink-400">MANAGEMENT</p>
+          <p className="nav-kicker mt-6">People & governance</p>
           {MANAGEMENT.map((item) => (
-            <NavItem key={item.href} {...item} active={pathname?.startsWith(item.href) ?? false} />
+            <NavItem key={item.href} {...item} active={pathname?.startsWith(item.href) ?? false} onNavigate={() => setNavOpen(false)} />
           ))}
         </nav>
 
-        <div className="border-t border-surface-border p-3">
-          <div className="flex items-center gap-2 rounded-md px-2 py-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent">
+        <div className="border-t border-white/10 p-3">
+          <div className="flex items-center gap-2 rounded-lg bg-white/5 px-2 py-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-400 text-xs font-bold text-navy-950">
               {userEmail.charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-medium text-ink-900">{userEmail}</p>
-              <p className="text-[11px] uppercase tracking-wide text-ink-400">{userRole.replace("_", " ")}</p>
+              <p className="truncate text-xs font-medium text-white">{userEmail}</p>
+              <p className="text-[10px] uppercase tracking-wide text-slate-400">{userRole.replace("_", " ")}</p>
             </div>
           </div>
           <form action="/api/auth/logout" method="post">
             <button
               type="submit"
-              className="mt-1 flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm text-ink-600 hover:bg-surface-muted"
+              className="mt-2 flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm text-slate-400 hover:bg-white/10 hover:text-white"
             >
               <LogOut size={16} /> Sign out
             </button>
@@ -119,13 +128,15 @@ export function AppShell({
       </aside>
 
       <div className="flex flex-1 flex-col">
-        <header className="flex items-center gap-4 border-b border-surface-border bg-white px-6 py-3">
-          <div className="relative max-w-md flex-1">
+        <header className="app-topbar flex items-center gap-3 border-b border-surface-border bg-white px-4 py-3 sm:px-6">
+          <button type="button" aria-label="Open navigation" className="nav-open" onClick={() => setNavOpen(true)}><Menu size={20} /></button>
+          <div className="relative max-w-xl flex-1">
             <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" />
-            <input className="input pl-9" placeholder="Search assets, serial, employee…" />
+            <input className="input search-input pl-9" placeholder="Search assets, serial, employee…" />
           </div>
+          <div className="hidden items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-400 sm:flex"><Activity size={15} className="text-success" /> Live system</div>
         </header>
-        <main className="flex-1 p-6">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
   );
@@ -136,17 +147,20 @@ function NavItem({
   label,
   icon: Icon,
   active,
+  onNavigate,
 }: {
   href: string;
   label: string;
   icon: LucideIcon;
   active: boolean;
+  onNavigate: () => void;
 }) {
   return (
     <Link
       href={href}
-      className={`mb-0.5 flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
-        active ? "bg-accent/10 font-medium text-accent" : "text-ink-600 hover:bg-surface-muted"
+      onClick={onNavigate}
+      className={`nav-item mb-0.5 flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
+        active ? "nav-item-active font-medium" : "text-slate-400 hover:bg-white/10 hover:text-white"
       }`}
     >
       <Icon size={17} />

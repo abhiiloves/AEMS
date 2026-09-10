@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
-import { createServerSupabase } from "@/lib/supabase/server";
+import { createServiceRoleSupabase } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email/send";
 
 const OTP_TTL_MINUTES = 10;
@@ -18,8 +18,10 @@ function hashCode(code: string) {
 // fail on serverless because a different function instance might handle
 // the verify request than the one that generated the code.
 export async function POST(req: NextRequest) {
-  const { email } = await req.json();
-  const supabase = await createServerSupabase();
+  const body = await req.json();
+  const email = String(body.email ?? "").trim().toLowerCase();
+  if (!email) return NextResponse.json({ error: "Email is required." }, { status: 400 });
+  const supabase = createServiceRoleSupabase();
 
   const windowStart = new Date(Date.now() - SEND_WINDOW_MINUTES * 60 * 1000).toISOString();
   const { data: recent } = await supabase
@@ -41,18 +43,26 @@ export async function POST(req: NextRequest) {
   const code = String(crypto.randomInt(0, 1_000_000)).padStart(6, "0");
   const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000).toISOString();
 
-  await supabase.from("otp_codes").insert({ email, code_hash: hashCode(code), expires_at: expiresAt });
+  const { error: insertError } = await supabase.from("otp_codes").insert({ email, code_hash: hashCode(code), expires_at: expiresAt });
+  if (insertError) {
+    console.error("[otp] could not store code:", insertError);
+    return NextResponse.json({ error: "Could not create OTP. Please try again." }, { status: 500 });
+  }
 
   // Sent via the project's own email layer (lib/email/send.ts), not
   // Supabase's built-in auth email â€” keeps branding/control consistent
   // with the rest of the notification system. Falls back to logging
   // the code to the server console if SMTP env vars aren't set yet.
-  await sendEmail(
+  const emailResult = await sendEmail(
     [email],
     [],
     "Your AEMS login code",
     `<p>Your one-time login code is:</p><p style="font-size:28px;font-weight:700;letter-spacing:4px">${code}</p><p>This code expires in ${OTP_TTL_MINUTES} minutes.</p>`
   );
+
+  if (!emailResult.ok) {
+    return NextResponse.json({ error: "Could not send OTP email. Please try again later." }, { status: 502 });
+  }
 
   await supabase.from("audit_logs").insert({
     user_email: email,

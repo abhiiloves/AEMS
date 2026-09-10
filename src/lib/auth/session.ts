@@ -26,19 +26,21 @@ export async function finalizeSession(
 ) {
   const sessionId = crypto.randomUUID();
 
-  await supabase.from("sessions").update({ is_active: false }).eq("user_id", userId).eq("is_active", true);
+  const { error: deactivateError } = await supabase.from("sessions").update({ is_active: false }).eq("user_id", userId).eq("is_active", true);
+  if (deactivateError) throw new Error(`Could not deactivate prior session: ${deactivateError.message}`);
 
-  await supabase.from("sessions").insert({
+  const { error: insertError } = await supabase.from("sessions").insert({
     user_id: userId,
     session_token: sessionId,
     role,
     ip_address: req.headers.get("x-forwarded-for")?.split(",")[0] ?? null,
     device_info: req.headers.get("user-agent"),
   });
+  if (insertError) throw new Error(`Could not create session: ${insertError.message}`);
 
   (await cookies()).set(SESSION_COOKIE, sessionId, {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
   });
