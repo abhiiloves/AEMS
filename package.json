@@ -2,6 +2,10 @@
   "name": "aems-v2",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "24.19.0",
+    "npm": ">=11"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,34 +13,27 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "^14.2.0",
-    "react": "^18.3.0",
-    "react-dom": "^18.3.0",
-    "@supabase/supabase-js": "^2.45.0",
-    "@supabase/ssr": "^0.5.0",
-    "zod": "^3.23.0",
-    "react-hook-form": "^7.52.0",
     "@hookform/resolvers": "^3.9.0",
-    "papaparse": "^5.4.1",
-<<<<<<< HEAD
+    "@supabase/ssr": "^0.5.0",
+    "@supabase/supabase-js": "^2.45.0",
     "lucide-react": "^0.400.0",
-    "nodemailer": "^6.9.14"
-=======
-    "lucide-react": "^0.400.0"
->>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
+    "next": "16.3.4",
+    "nodemailer": "^6.9.14",
+    "papaparse": "^5.4.1",
+    "react": "18.3.0",
+    "react-dom": "18.3.0",
+    "react-hook-form": "^7.52.0",
+    "zod": "^3.23.0"
   },
   "devDependencies": {
-    "typescript": "^5.5.0",
     "@types/node": "^20.14.0",
+    "@types/nodemailer": "^6.4.15",
+    "@types/papaparse": "^5.3.14",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
-    "@types/papaparse": "^5.3.14",
-<<<<<<< HEAD
-    "@types/nodemailer": "^6.4.15",
-=======
->>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
-    "tailwindcss": "^3.4.0",
+    "autoprefixer": "^10.4.0",
     "postcss": "^8.4.0",
-    "autoprefixer": "^10.4.0"
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.5.0"
   }
 }

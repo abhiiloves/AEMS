@@ -45,17 +45,10 @@ export default async function DashboardPage() {
     <AppShell userEmail={appUser?.email ?? user.email ?? ""} userRole={appUser?.role ?? "user"}>
       <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard label="Total Assets" value={total} tone="navy" />
-<<<<<<< HEAD
-        <StatCard label="Assigned / In Use" value={counts.assigned} tone="accent" />
-        <StatCard label="Available" value={counts.available} tone="success" />
-        <StatCard label="Maintenance" value={counts.maintenance} tone="attention" />
-        <StatCard label="Scrapped" value={counts.scrapped} tone="danger" />
-=======
         <StatCard label="Assigned / In Use" value={counts.assigned ?? 0} tone="accent" />
         <StatCard label="Available" value={counts.available ?? 0} tone="success" />
         <StatCard label="Maintenance" value={counts.maintenance ?? 0} tone="attention" />
         <StatCard label="Scrapped" value={counts.scrapped ?? 0} tone="danger" />
->>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
       </div>
 
       <div className="card">

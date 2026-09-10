@@ -20,23 +20,8 @@ export default async function EmployeeDetailPage({ params }: { params: { id: str
     .eq("employee_id", params.id)
     .order("assigned_on", { ascending: false });
 
-<<<<<<< HEAD
   const current = (assignments ?? []).filter((a) => a.returned_on === null);
   const past = (assignments ?? []).filter((a) => a.returned_on !== null);
-=======
-  // Same Supabase FK-join typing quirk as the asset detail page: the
-  // generated type is an array even though this is a one-to-one join
-  // at runtime.
-  type AssignmentRow = {
-    id: string;
-    assigned_on: string;
-    returned_on: string | null;
-    assets: { id: string; asset_code: string; brand: string; model: string } | null;
-  };
-  const typedAssignments = (assignments ?? []) as unknown as AssignmentRow[];
-  const current = typedAssignments.filter((a) => a.returned_on === null);
-  const past = typedAssignments.filter((a) => a.returned_on !== null);
->>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
 
   return (
     <AppShell userEmail={appUser?.email ?? user.email ?? ""} userRole={appUser?.role ?? "user"}>
@@ -64,11 +49,7 @@ export default async function EmployeeDetailPage({ params }: { params: { id: str
 
         <div className="card p-5">
           <h2 className="mb-3 text-sm font-semibold text-ink-900">
-<<<<<<< HEAD
             Assignment history ({assignments?.length ?? 0} total ever assigned)
-=======
-            Assignment history ({typedAssignments.length} total ever assigned)
->>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
           </h2>
           {past.length === 0 ? (
             <p className="text-sm text-ink-400">No past assignments.</p>

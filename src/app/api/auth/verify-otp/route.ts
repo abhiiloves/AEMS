@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import crypto from "node:crypto";
+import crypto from "crypto";
 import { createServerSupabase, createServiceRoleSupabase } from "@/lib/supabase/server";
 import { finalizeSession } from "@/lib/auth/session";
 
