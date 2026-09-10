@@ -1,5 +1,6 @@
 # AEMS v2 — starting scaffold
 
+<<<<<<< HEAD
 ## Cross-check findings (read this first)
 
 A full pass over the codebase turned up two bugs serious enough to
@@ -45,6 +46,8 @@ also present -- they aren't optional, the app does not work correctly
 without them regardless of what else changes.
 
 
+=======
+>>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
 This is a **starting scaffold**, not a finished app. It gives you the
 full database schema, RLS policies, and the core auth/permission/
 session wiring, plus one fully-implemented reference module (Assets)
@@ -74,10 +77,36 @@ supabase/migrations/
   010_otp_login.sql             OTP-only auth (reverted from password+2FA) —
                                 hashed, DB-backed otp_codes table
   011_department_admin.sql      departments.admin_user_id — IT-Admin-assigned
+<<<<<<< HEAD
                                 responsible person, informational only
                                 (does NOT grant access — see file comment)
   012_audit_realtime.sql        enables Supabase Realtime on audit_logs
                                 for the IT-Admin-only live view
+=======
+                                responsible person. Originally
+                                informational only (did NOT grant
+                                access); superseded by 014 + the API
+                                layer, which now also grants that
+                                person edit access to the department
+  012_audit_realtime.sql        enables Supabase Realtime on audit_logs
+                                for the IT-Admin-only live view
+  013_email_rls.sql             RLS for email templates/automations
+  014_department_hierarchy.sql  departments now belong to a Plant;
+                                new sub_departments table (one level
+                                under a department); user_scope +
+                                has_scope() extended with department_id/
+                                sub_department_id so IT Admin can scope
+                                a user down to one sub-department —
+                                see the file's header comment, this
+                                supersedes the original "department is
+                                not access-scope" decision below. The
+                                API layer (not this migration) also now
+                                auto-grants a department's assigned
+                                admin edit access to that department +
+                                its sub-departments — see
+                                grantDepartmentAdminScope() in
+                                src/lib/settingsHelpers.ts
+>>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
 
 src/
   lib/supabase/client.ts        browser client (thin wrapper — see note below)
@@ -248,9 +277,23 @@ src/
 
 ## Decisions this scaffold encodes (so nothing has to be re-derived from chat)
 
+<<<<<<< HEAD
 - **Permission model**: Category + Location + Plant scoping via `user_scope`,
   not department. `department_id` on `assets`/`employees` is ownership
   metadata only, never used for access control.
+=======
+- **Permission model**: Category + Location + Plant + Department +
+  Sub-department scoping via `user_scope` (extended 2026-09, see
+  014_department_hierarchy.sql). Originally the project scoped only
+  Category+Location+Plant and treated `department_id` on `assets`/
+  `employees` as pure ownership metadata never used for access control
+  — that decision is now superseded: `has_scope()` also checks
+  department_id/sub_department_id when present, so IT Admin can
+  restrict a user down to a single sub-department. Every dimension
+  still follows the same NULL-means-unrestricted convention, so
+  existing scope rows that don't set department/sub-department keep
+  working unchanged.
+>>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
 - **Roles**: `it_admin`, `admin`, `hr`, `user` — fixed enum, not a generic
   role_permissions table. The "global read-only Admin" is just a `user_scope`
   row with everything `null` + `can_edit = false` — no fifth role.
@@ -342,9 +385,27 @@ finished production app. Specifically still open:
 - Settings: category custom-field management (adding MAC/IP-style
   fields to a category) has an API route but no UI yet -- only the
   category list itself has one.
+<<<<<<< HEAD
 - User Management: scope assignment (Category+Location+Plant, and the
   global read-only Admin) has an API route but no UI yet -- new users
   get created with no scope and need it added via the API for now.
+=======
+- User Management: scope assignment now has a UI (Access panel per
+  user, Plant → Department → Sub-department cascading selects, plus
+  Category and Location) — see UserManagementBoard.tsx. New users
+  still get created with no scope by default and need at least one
+  scope row added via this panel.
+- Settings → Departments: rename, delete, and department-admin
+  assignment all have UI now (Pencil/Trash icons + admin dropdown per
+  row). Delete is FK-protected — it fails with a clear message if
+  anything (assets, employees, sub-departments, a user's scope) still
+  references the department.
+- Audit Logs: every row that has old_value/new_value (any create,
+  edit, or delete of a Location/Plant/Department/Sub-department/Asset/
+  etc.) now has an expand chevron showing exactly which fields
+  changed, old value struck through next to the new one — not just
+  "something happened", but what.
+>>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
 - General: no loading skeletons/error boundaries, no toasts (some
   actions use `alert`/`prompt`, which work but aren't the final
   polish), no automated tests, and this hasn't been run against a real
@@ -356,3 +417,7 @@ None of this changes the architecture -- it's the same pattern
 (RLS-scoped queries, audit logging, permission checks mirrored
 client-side for UX) applied to fewer surfaces than exist. Ask for any
 specific gap closed next.
+<<<<<<< HEAD
+=======
+"# AEMS" 
+>>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592

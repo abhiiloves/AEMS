@@ -1,8 +1,13 @@
 "use client";
 
 import Link from "next/link";
+<<<<<<< HEAD
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+=======
+import { usePathname } from "next/navigation";
+import type { LucideIcon } from "lucide-react";
+>>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
 import {
   LayoutGrid,
   Cpu,
@@ -69,7 +74,13 @@ export function AppShell({
     <div className="flex min-h-screen bg-surface-muted">
       <aside className="flex w-64 shrink-0 flex-col border-r border-surface-border bg-white">
         <div className="flex items-center gap-3 border-b border-surface-border px-5 py-4">
+<<<<<<< HEAD
           <Image src="/pg-logo.png" alt="PG" width={36} height={36} className="h-9 w-9 object-contain" />
+=======
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-navy-900 text-xs font-semibold text-white">
+            PG
+          </div>
+>>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
           <div>
             <p className="text-sm font-semibold text-ink-900">A.E.M.S</p>
             <p className="text-[11px] text-ink-400">Asset Management</p>
@@ -138,7 +149,11 @@ function NavItem({
 }: {
   href: string;
   label: string;
+<<<<<<< HEAD
   icon: React.ComponentType<{ size?: number }>;
+=======
+  icon: LucideIcon;
+>>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
   active: boolean;
 }) {
   return (

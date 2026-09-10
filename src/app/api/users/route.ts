@@ -13,7 +13,11 @@ export async function GET() {
     .select(
       `
       id, email, role, is_active, mfa_enabled, can_bulk_import, can_export, created_at,
+<<<<<<< HEAD
       user_scope ( id, location_id, plant_id, category_id, can_edit )
+=======
+      user_scope ( id, location_id, plant_id, category_id, department_id, sub_department_id, can_edit )
+>>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
     `
     )
     .order("email");

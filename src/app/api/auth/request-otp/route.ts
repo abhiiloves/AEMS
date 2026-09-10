@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { createServerSupabase } from "@/lib/supabase/server";
+<<<<<<< HEAD
 import { sendEmail } from "@/lib/email/send";
+=======
+>>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
 
 const OTP_TTL_MINUTES = 10;
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -43,6 +46,7 @@ export async function POST(req: NextRequest) {
 
   await supabase.from("otp_codes").insert({ email, code_hash: hashCode(code), expires_at: expiresAt });
 
+<<<<<<< HEAD
   // Sent via the project's own email layer (lib/email/send.ts), not
   // Supabase's built-in auth email — keeps branding/control consistent
   // with the rest of the notification system. Falls back to logging
@@ -53,6 +57,14 @@ export async function POST(req: NextRequest) {
     "Your AEMS login code",
     `<p>Your one-time login code is:</p><p style="font-size:28px;font-weight:700;letter-spacing:4px">${code}</p><p>This code expires in ${OTP_TTL_MINUTES} minutes.</p>`
   );
+=======
+  // Send via the project's own email-automation layer (email_templates /
+  // email_execution_logs), not Supabase's built-in auth email — keeps
+  // branding/control consistent with the rest of the notification
+  // system. Wire up an actual SMTP send here; left as a stub so this
+  // scaffold doesn't require real SMTP credentials to run.
+  console.log(`[otp] would send code ${code} to ${email} (expires in ${OTP_TTL_MINUTES}m)`);
+>>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
 
   await supabase.from("audit_logs").insert({
     user_email: email,

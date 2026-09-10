@@ -22,7 +22,11 @@ export async function GET(req: NextRequest) {
   let query = supabase
     .from("audit_logs")
     .select(
+<<<<<<< HEAD
       "id, user_id, user_email, user_role, event_category, event_type, table_name, record_id, new_value, ip_address, approx_location, plant_id, location_id, device_info, session_duration, created_at",
+=======
+      "id, user_id, user_email, user_role, event_category, event_type, table_name, record_id, old_value, new_value, ip_address, approx_location, plant_id, location_id, device_info, session_duration, created_at",
+>>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
       { count: "exact" }
     )
     .order("created_at", { ascending: false })

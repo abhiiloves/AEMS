@@ -18,8 +18,12 @@
     "react-hook-form": "^7.52.0",
     "@hookform/resolvers": "^3.9.0",
     "papaparse": "^5.4.1",
+<<<<<<< HEAD
     "lucide-react": "^0.400.0",
     "nodemailer": "^6.9.14"
+=======
+    "lucide-react": "^0.400.0"
+>>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
   },
   "devDependencies": {
     "typescript": "^5.5.0",
@@ -27,7 +31,10 @@
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "@types/papaparse": "^5.3.14",
+<<<<<<< HEAD
     "@types/nodemailer": "^6.4.15",
+=======
+>>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
     "tailwindcss": "^3.4.0",
     "postcss": "^8.4.0",
     "autoprefixer": "^10.4.0"

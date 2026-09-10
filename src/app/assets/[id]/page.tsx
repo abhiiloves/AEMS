@@ -29,6 +29,17 @@ export default async function AssetDetailPage({ params }: { params: { id: string
 
   const current = history?.find((h) => h.returned_on === null);
 
+<<<<<<< HEAD
+=======
+  // Supabase's generated types can't tell this FK join is one-to-one
+  // (it infers an array), even though PostgREST returns a single row
+  // here at runtime — same quirk as elsewhere in this project.
+  type HistoryRow = (typeof history extends (infer R)[] | null ? R : never) & {
+    employee: { full_name: string; employee_code: string } | null;
+  };
+  const typedHistory = (history ?? []) as unknown as HistoryRow[];
+
+>>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
   return (
     <AppShell userEmail={appUser?.email ?? user.email ?? ""} userRole={appUser?.role ?? "user"}>
       <div className="mx-auto max-w-3xl">
@@ -63,7 +74,11 @@ export default async function AssetDetailPage({ params }: { params: { id: string
 
         <div className="card mt-6">
           <h2 className="border-b border-surface-border px-5 py-3 text-sm font-semibold text-ink-900">Assignment history</h2>
+<<<<<<< HEAD
           {history && history.length > 0 ? (
+=======
+          {typedHistory.length > 0 ? (
+>>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
             <table className="w-full text-sm">
               <thead className="bg-surface-muted text-left text-xs text-ink-400">
                 <tr>
@@ -74,7 +89,11 @@ export default async function AssetDetailPage({ params }: { params: { id: string
                 </tr>
               </thead>
               <tbody className="divide-y divide-surface-border">
+<<<<<<< HEAD
                 {history.map((h) => (
+=======
+                {typedHistory.map((h) => (
+>>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
                   <tr key={h.id}>
                     <td className="px-5 py-2.5 text-ink-900">
                       {h.employee?.full_name} <span className="text-ink-400">· {h.employee?.employee_code}</span>

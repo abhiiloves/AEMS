@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { createServerClient } from "@supabase/ssr";
+=======
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+>>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
 import { cookies } from "next/headers";
 
 // Server-side client using the anon key + the caller's session cookie,
@@ -14,9 +18,15 @@ export function createServerSupabase() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
+<<<<<<< HEAD
         get: (name) => cookieStore.get(name)?.value,
         set: (name, value, options) => cookieStore.set({ name, value, ...options }),
         remove: (name, options) => cookieStore.set({ name, value: "", ...options }),
+=======
+        get: (name: string) => cookieStore.get(name)?.value,
+        set: (name: string, value: string, options: CookieOptions) => cookieStore.set({ name, value, ...options }),
+        remove: (name: string, options: CookieOptions) => cookieStore.set({ name, value: "", ...options }),
+>>>>>>> 83485868e5f6aece6e75b073db6bda2739bcc592
       },
     }
   );
